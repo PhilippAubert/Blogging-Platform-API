@@ -16,5 +16,11 @@
     "url": "https://github.com/PhilippAubert/Blogging-Platform-API/issues"
   },
   "homepage": "https://github.com/PhilippAubert/Blogging-Platform-API#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mysql2": "^3.16.0",
+    "nodemon": "^3.1.11"
+  }
 }
