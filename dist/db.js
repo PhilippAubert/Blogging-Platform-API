@@ -1,11 +1,11 @@
-import mysql from "mysql";
+import mysql from "mysql2";
 import dotenv from "dotenv";
 dotenv.config();
 const connection = mysql.createConnection({
-    host: process.env.HOST,
-    user: process.env.USER,
-    password: process.env.PW,
-    database: "tha_blog"
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PW,
+    database: process.env.DB
 });
 connection.connect((err) => {
     console.log("ENTERING!");
