@@ -7,5 +7,5 @@ app.get("/", (req, res) => {
     res.end("Nice to see you!");
 });
 app.listen(port, () => {
-    console.log("SERVER IS RUNNING!");
+    console.log("SERVER IS STILL RUNNING!");
 });

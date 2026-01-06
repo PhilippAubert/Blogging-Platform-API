@@ -1,3 +1,5 @@
 /node_modules
 requirement.txt
 .env
+/dist/*.js
+/dist

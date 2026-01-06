@@ -4,17 +4,15 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const connection = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PW,
-  database: process.env.DB
-})
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PW,
+    database: process.env.DB
+});
 
-connection.connect((err)=>{
-    console.log("ENTERING!")
+connection.connect((err) => { 
     if (err) {
         console.error('Error connecting to MySQL!!!:', err);
         return;
-      }
-      console.log('Connected to MySQL!');
+    }
 });
