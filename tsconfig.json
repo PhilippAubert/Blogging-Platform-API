@@ -1,20 +1,17 @@
 {
   "compilerOptions": {
+    "module": "nodenext",    // This enables top-level await and ES Modules
+    "target": "esnext",      // Ensure the target is set to at least es2017 or esnext
     "outDir": "./dist",
-    "module": "nodenext",
-    "target": "esnext",
-    "lib": ["esnext"],
-    "types": ["node"],
-    "sourceMap": true,
+    "lib": ["esnext"],       // Include the latest ECMAScript features
+    "sourceMap": false,
     "declaration": false,
     "declarationMap": false,
     "strict": true,
     "skipLibCheck": true,
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force"
+    "esModuleInterop": true, // Allows importing CommonJS modules in an ES module format
+    "moduleResolution": "nodenext"
   },
-  "include": ["*.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules"]
 }
