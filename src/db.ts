@@ -60,7 +60,7 @@ const createDBAndTables = async () => {
     }
 };
 
-const listAllPosts = async (): Promise<any[]> => {
+export const listAllPosts = async (): Promise<any[]> => {
     try {
         const [rows] = await pool.query<RowDataPacket[]>("SELECT * FROM posts");
         return rows;
@@ -75,14 +75,14 @@ const listAllPosts = async (): Promise<any[]> => {
     }
 };
 
-const listOnePost = async (id: number): Promise<Post | undefined> => {
+export const listOnePost = async (id: number): Promise<Post | undefined> => {
     const [rows] = await pool.query<RowDataPacket[] & Post[]>(`SELECT * FROM posts WHERE id = ?`, [id]);
     return rows[0];
 };
 
-const addPost = async (title: string, content: string, category: string, tags: string): Promise<string> => { 
-    const [result] = await pool.query<ResultSetHeader>(`
-        INSERT INTO posts (title, content, category, tags) VALUES (?, ?, ?, ?)
-    `, [title, content, category, tags]);
+export const addPost = async (title: string, content: string, category: string, tags: string): Promise<string> => { 
+    const [result] = await pool.query<ResultSetHeader>(`INSERT INTO posts (title, content, category, tags) VALUES (?, ?, ?, ?)`, 
+        [title, content, category, tags]);
     return result.insertId, " added";
 };
+

@@ -1,5 +1,5 @@
-import mysql from "mysql2";
 import dotenv from "dotenv";
+import mysql from "mysql2";
 dotenv.config();
 const bootstrapPool = mysql.createPool({
     host: process.env.DB_HOST,
@@ -41,7 +41,7 @@ const createDBAndTables = async () => {
         process.exit(1);
     }
 };
-const listAllPosts = async () => {
+export const listAllPosts = async () => {
     try {
         const [rows] = await pool.query("SELECT * FROM posts");
         return rows;
@@ -56,7 +56,11 @@ const listAllPosts = async () => {
         throw err;
     }
 };
-const listOnePost = async (id) => {
+export const listOnePost = async (id) => {
     const [rows] = await pool.query(`SELECT * FROM posts WHERE id = ?`, [id]);
     return rows[0];
+};
+export const addPost = async (title, content, category, tags) => {
+    const [result] = await pool.query(`INSERT INTO posts (title, content, category, tags) VALUES (?, ?, ?, ?)`, [title, content, category, tags]);
+    return result.insertId, " added";
 };
