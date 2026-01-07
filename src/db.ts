@@ -1,5 +1,9 @@
-import mysql, { RowDataPacket }  from "mysql2";
 import dotenv from "dotenv";
+
+import mysql, { 
+    RowDataPacket, 
+    ResultSetHeader 
+} from "mysql2";
 
 dotenv.config();
 
@@ -74,4 +78,11 @@ const listAllPosts = async (): Promise<any[]> => {
 const listOnePost = async (id: number): Promise<Post | undefined> => {
     const [rows] = await pool.query<RowDataPacket[] & Post[]>(`SELECT * FROM posts WHERE id = ?`, [id]);
     return rows[0];
+};
+
+const addPost = async (title: string, content: string, category: string, tags: string): Promise<string> => { 
+    const [result] = await pool.query<ResultSetHeader>(`
+        INSERT INTO posts (title, content, category, tags) VALUES (?, ?, ?, ?)
+    `, [title, content, category, tags]);
+    return result.insertId, " added";
 };
