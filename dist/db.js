@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import mysql from "mysql2";
+import { buildUpdateFields } from "./utils/handlers.js";
 dotenv.config();
 const bootstrapPool = mysql.createPool({
     host: process.env.DB_HOST,
@@ -63,4 +64,19 @@ export const listOnePost = async (id) => {
 export const addPost = async (title, content, category, tags) => {
     const [result] = await pool.query(`INSERT INTO posts (title, content, category, tags) VALUES (?, ?, ?, ?)`, [title, content, category, tags]);
     return await listOnePost(result.insertId);
+};
+export const updatePost = async (id, title, content, category, tags) => {
+    const { sql, values } = buildUpdateFields({ title, content, category, tags });
+    if (sql.length === 0)
+        return await listOnePost(id);
+    values.push(id);
+    const query = `UPDATE posts SET ${sql.join(", ")} WHERE id = ?`;
+    const [result] = await pool.query(query, values);
+    if (result.affectedRows === 0)
+        return undefined;
+    return await listOnePost(id);
+};
+export const deleteOnePost = async (id) => {
+    const [result] = await pool.query(`DELETE FROM posts WHERE id = ?`, [id]);
+    return result.affectedRows > 0;
 };
