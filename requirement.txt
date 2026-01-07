@@ -1,6 +1,0 @@
-1. Test all crud-routes 
-// use postman! 
-
-2. Add validation 
-
-3. Refactor it all! 
