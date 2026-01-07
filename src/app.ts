@@ -33,6 +33,12 @@ app.get("/posts/:id", async (req, res) => {
     res.send(post);
 });
 
+app.post("/posts", async (req,res) => {
+    const {title, content, category, tags} = req.body;
+    const post = await addPost(title, content, category, tags);
+    res.status(201).send(post);
+});
+
 app.use(errorHandler);
 
 app.listen(port, () => {

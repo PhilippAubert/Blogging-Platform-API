@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import { listAllPosts, listOnePost } from "./db.js";
+import { listAllPosts, listOnePost, addPost } from "./db.js";
 import { errorHandler } from "./utils/handlers.js";
 dotenv.config();
 const port = process.env.PORT || 4400;
@@ -21,6 +21,11 @@ app.get("/posts/:id", async (req, res) => {
     if (post === undefined)
         res.end("Cannot find the post!");
     res.send(post);
+});
+app.post("/posts", async (req, res) => {
+    const { title, content, category, tags } = req.body;
+    const post = await addPost(title, content, category, tags);
+    res.status(201).send(post);
 });
 app.use(errorHandler);
 app.listen(port, () => {

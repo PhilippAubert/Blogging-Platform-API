@@ -80,9 +80,9 @@ export const listOnePost = async (id: number): Promise<Post | undefined> => {
     return rows[0];
 };
 
-export const addPost = async (title: string, content: string, category: string, tags: string): Promise<string> => { 
+export const addPost = async (title: string, content: string, category: string, tags: string): Promise<Post | undefined> => { 
     const [result] = await pool.query<ResultSetHeader>(`INSERT INTO posts (title, content, category, tags) VALUES (?, ?, ?, ?)`, 
         [title, content, category, tags]);
-    return result.insertId, " added";
+    return await listOnePost(result.insertId)
 };
 

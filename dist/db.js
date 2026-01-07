@@ -62,5 +62,5 @@ export const listOnePost = async (id) => {
 };
 export const addPost = async (title, content, category, tags) => {
     const [result] = await pool.query(`INSERT INTO posts (title, content, category, tags) VALUES (?, ?, ?, ?)`, [title, content, category, tags]);
-    return result.insertId, " added";
+    return await listOnePost(result.insertId);
 };
