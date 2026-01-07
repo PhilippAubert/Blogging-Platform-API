@@ -6,9 +6,6 @@ dotenv.config();
 const port = process.env.PORT || 4400;
 const app = express();
 app.use(express.json());
-app.get("/", (req, res) => {
-    res.end("Nice to see you!");
-});
 app.get("/posts", async (req, res, next) => {
     try {
         const posts = await listAllPosts();

@@ -18,10 +18,6 @@ const app = express();
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-    res.end("Nice to see you!");
-});
-
 app.get("/posts", async (req, res, next) => {
     try {
         const posts = await listAllPosts();
@@ -45,7 +41,6 @@ app.get("/posts/:id", async (req, res, next) => {
             res.status(404).json({ error: `Cannot find post with ID ${id}` });
             return;
         }
-
         res.send(post);
     } catch (err) {
         next(err);
@@ -59,7 +54,6 @@ app.post("/posts", async (req, res, next) => {
             res.status(400).json({ error: "Missing required fields" });
             return;
         }
-
         const post = await addPost(title, content, category, tags);
         res.status(201).send(post);
     } catch (err) {
@@ -90,7 +84,6 @@ app.delete("/posts/:id", async (req, res, next) => {
     try {
         const id = Number(req.params.id);
         if (isNaN(id) || id <= 0) throw new Error("Invalid post ID");
-
         const message = await deleteOnePost(id);
         res.json({ message });
     } catch (err) {
