@@ -68,13 +68,13 @@ app.put("/posts/:id", async (req, res, next) => {
         if (isNaN(id) || id <= 0) {
             return res.status(400).json({ error: "Invalid post ID" });
         }
-        
+
         const { title, content, category, tags } = req.body;
         if (tags !== undefined && !Array.isArray(tags)) {
             return res.status(400).json({ error: "tags must be an array" });
         }
 
-        const updatedPost = await updatePost(id, { title, content, category, tags });
+        const updatedPost = await updatePost(id, title, content, category, tags);
         if (!updatedPost) {
             return res.status(404).json({ error: `Post not found: ${id}` });
         }

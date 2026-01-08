@@ -5,9 +5,8 @@ import mysql, {
     ResultSetHeader 
 } from "mysql2";
 
-import { buildUpdateFields } from "./utils/handlers.js";
 
-import { Post, UpdatePostInput } from "./types/types.js";
+import { Post } from "./types/types.js";
 
 dotenv.config();
 
@@ -75,30 +74,22 @@ export const listOnePost = async (id: number): Promise<Post | undefined> => {
 };
 
 export const addPost = async (title: string, content: string, category: string, tags: string[]): Promise<Post | undefined> => { 
-    const tagsString = tags.join(',');
-    const [result] = await pool.query<ResultSetHeader>(
-      `INSERT INTO posts (title, content, category, tags)
-       VALUES (?, ?, ?, ?)`,
-      [title, content, category, JSON.stringify(tagsString)]
+    const [result] = await pool.query<ResultSetHeader>(`INSERT INTO posts (title, content, category, tags) VALUES (?, ?, ?, ?)`, 
+        [title, content, category, JSON.stringify(tags)]
     );
     return await listOnePost(result.insertId)
 };
 
-export const updatePost = async (id: number, fields: UpdatePostInput): Promise<Post | undefined> => {
-    const { sql, values } = buildUpdateFields(fields);
-    if (sql.length === 0) return await listOnePost(id);
-    values.push(id);
-    const query = `UPDATE posts SET ${sql.join(", ")} WHERE id = ?`;
-    const [result] = await pool.query<ResultSetHeader>(query, values);
+export const updatePost = async (id: number, title: string, content: string, category: string, tags: string[]): Promise<Post | undefined> => {
+    const [result] = await pool.query<ResultSetHeader>(`UPDATE posts SET title = ?, content = ?, category = ?, tags = ? WHERE id = ?`, 
+        [title, content, category, JSON.stringify(tags), id]
+    );
     if (result.affectedRows === 0) return undefined;
-    return await listOnePost(result.insertId);
+    return await listOnePost(id);
 };
 
 export const deleteOnePost = async (id: number): Promise<boolean> => {
-    const [result] = await pool.query<ResultSetHeader>(
-        `DELETE FROM posts WHERE id = ?`,
-        [id]
-    );
+    const [result] = await pool.query<ResultSetHeader>(`DELETE FROM posts WHERE id = ?`, [id]);
     return result.affectedRows > 0;
 };
 
