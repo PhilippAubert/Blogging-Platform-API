@@ -1,4 +1,4 @@
 /node_modules
 requirement.txt
 .env
-/dist/
+dist/
