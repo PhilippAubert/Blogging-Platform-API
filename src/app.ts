@@ -50,10 +50,11 @@ app.get("/posts/:id", async (req, res, next) => {
 app.post("/posts", async (req, res, next) => {
     try {
         const { title, content, category, tags } = req.body;
-        if (!title || !content || !category || !tags) {
+        if (!title || !content || !category || !Array.isArray(tags)) {
             res.status(400).json({ error: "Missing required fields" });
             return;
         }
+
         const post = await addPost(title, content, category, tags);
         res.status(201).send(post);
     } catch (err) {
@@ -65,21 +66,24 @@ app.put("/posts/:id", async (req, res, next) => {
     try {
         const id = Number(req.params.id);
         if (isNaN(id) || id <= 0) {
-            res.status(400).json({ error: "Invalid post ID" });
-            return;
+            return res.status(400).json({ error: "Invalid post ID" });
         }
+        
         const { title, content, category, tags } = req.body;
-        const updatedPost = await updatePost(id, title, content, category, tags);
+        if (tags !== undefined && !Array.isArray(tags)) {
+            return res.status(400).json({ error: "tags must be an array" });
+        }
+
+        const updatedPost = await updatePost(id, { title, content, category, tags });
         if (!updatedPost) {
-            res.status(404).json({ error: `Post not found: ${id}` });
-            return;
+            return res.status(404).json({ error: `Post not found: ${id}` });
         }
         res.status(200).json(updatedPost);
     } catch (err) {
         next(err);
     }
 });
-
+  
 app.delete("/posts/:id", async (req, res, next) => {
     try {
         const id = Number(req.params.id);
