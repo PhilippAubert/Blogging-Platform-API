@@ -9,7 +9,7 @@ import {
     updatePost
 } from "./db.js";
 
-import { errorHandler } from "./utils/handlers.js";
+import { errorHandler, validateBody, validateID } from "./utils/handlers.js";
 
 dotenv.config();
 
@@ -34,8 +34,7 @@ app.get("/posts", async (req, res, next) => {
 app.get("/posts/:id", async (req, res, next) => {
     try {
         const id = Number(req.params.id);
-        if (isNaN(id) || id <= 0) throw new Error("Invalid post ID");
-
+        if (!validateID(id)) return res.status(412).end("unprocessable id");
         const post = await listOnePost(id);
         if (!post) {
             res.status(404).json({ error: `Cannot find post with ID ${id}` });
@@ -50,7 +49,8 @@ app.get("/posts/:id", async (req, res, next) => {
 app.post("/posts", async (req, res, next) => {
     try {
         const { title, content, category, tags } = req.body;
-        if (!title || !content || !category || !Array.isArray(tags)) {
+
+        if (!validateBody(title, content, category, tags)) {
             res.status(400).json({ error: "Missing required fields" });
             return;
         }
@@ -65,16 +65,16 @@ app.post("/posts", async (req, res, next) => {
 app.put("/posts/:id", async (req, res, next) => {
     try {
         const id = Number(req.params.id);
-        if (isNaN(id) || id <= 0) {
-            return res.status(400).json({ error: "Invalid post ID" });
-        }
-
         const { title, content, category, tags } = req.body;
-        if (tags !== undefined && !Array.isArray(tags)) {
-            return res.status(400).json({ error: "tags must be an array" });
+
+        if (!validateID(id)) throw new Error("Invalid post ID");      
+        if (!validateBody(title, content, category, tags)) {
+            res.status(400).json({ error: "Missing required fields" });
+            return;
         }
 
         const updatedPost = await updatePost(id, title, content, category, tags);
+
         if (!updatedPost) {
             return res.status(404).json({ error: `Post not found: ${id}` });
         }
@@ -87,9 +87,13 @@ app.put("/posts/:id", async (req, res, next) => {
 app.delete("/posts/:id", async (req, res, next) => {
     try {
         const id = Number(req.params.id);
-        if (isNaN(id) || id <= 0) throw new Error("Invalid post ID");
+        if (!validateID(id)) throw new Error("Invalid post ID");
+        
         const message = await deleteOnePost(id);
-        res.json({ message });
+        if (!message) {
+            return res.status(404).json({ error: `Post not found: ${id}` });
+        }
+        res.status(204).json({ message });
     } catch (err) {
         next(err);
     }
@@ -100,3 +104,22 @@ app.use(errorHandler);
 app.listen(port, () => {
     console.log(`SERVER IS RUNNING on port ${port}`);
 });
+
+
+//VALIDATE: 
+
+// VALIDATE: ID, REQUEST BODY: TAGS
+
+/***
+ *  if (tags !== undefined && !Array.isArray(tags)) {
+            return res.status(400).json({ error: "tags must be an array" });
+        }
+    
+    
+    if (isNaN(id) || id <= 0) throw new Error("Invalid post ID");
+
+   if (!title || !content || !category || !Array.isArray(tags)) {
+            res.status(400).json({ error: "Missing required fields" });
+            return;
+        }
+ */
