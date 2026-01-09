@@ -2,12 +2,10 @@ import dotenv from "dotenv";
 
 import mysql, { 
     RowDataPacket, 
-    ResultSetHeader 
+    ResultSetHeader
 } from "mysql2";
 
-import { buildUpdateFields } from "./utils/handlers.js";
-
-import { Post, UpdatePostInput } from "./types/types.js";
+import { Post } from "./types/types.js";
 
 dotenv.config();
 
@@ -54,20 +52,31 @@ const createDBAndTables = async () => {
     }
 };
 
-export const listAllPosts = async (): Promise<any[]> => {
+export const listAllPosts = async (value?: string): Promise<any[]> => {
     try {
+        if (value?.trim()) {
+            const search = `%${value}%`;
+            const [rows] = await pool.query<RowDataPacket[]>(
+                `
+                    SELECT DISTINCT p.* FROM posts p LEFT JOIN JSON_TABLE(p.tags, '$[*]' COLUMNS(tag VARCHAR(255) PATH '$')) jt ON TRUE
+                    WHERE LOWER(p.title) LIKE LOWER(?) OR LOWER(p.content) 
+                    LIKE LOWER(?) OR LOWER(p.category) LIKE LOWER(?) OR LOWER(jt.tag) LIKE LOWER(?)
+                `, [search, search, search, search]);
+            return rows;
+        }
         const [rows] = await pool.query<RowDataPacket[]>("SELECT * FROM posts");
+
         return rows;
     } catch (err: unknown) {
-        if (typeof err === "object" && err !== null && 'code' in err && (err as any).code === "ER_NO_SUCH_TABLE") {
+        if (typeof err === "object" && err !== null && "code" in err && (err as any).code === "ER_NO_SUCH_TABLE") {
             console.log("Posts table doesn't exist — creating DB and tables...");
             await createDBAndTables();
             const [rows] = await pool.query<RowDataPacket[]>("SELECT * FROM posts");
-            return rows;
-        }
+            return rows;}
         throw err;
     }
 };
+  
 
 export const listOnePost = async (id: number): Promise<Post | undefined> => {
     const [rows] = await pool.query<RowDataPacket[] & Post[]>(`SELECT * FROM posts WHERE id = ?`, [id]);
@@ -75,30 +84,22 @@ export const listOnePost = async (id: number): Promise<Post | undefined> => {
 };
 
 export const addPost = async (title: string, content: string, category: string, tags: string[]): Promise<Post | undefined> => { 
-    const tagsString = tags.join(',');
-    const [result] = await pool.query<ResultSetHeader>(
-      `INSERT INTO posts (title, content, category, tags)
-       VALUES (?, ?, ?, ?)`,
-      [title, content, category, JSON.stringify(tagsString)]
+    const [result] = await pool.query<ResultSetHeader>(`INSERT INTO posts (title, content, category, tags) VALUES (?, ?, ?, ?)`, 
+        [title, content, category, JSON.stringify(tags)]
     );
-    return await listOnePost(result.insertId)
-};
-
-export const updatePost = async (id: number, fields: UpdatePostInput): Promise<Post | undefined> => {
-    const { sql, values } = buildUpdateFields(fields);
-    if (sql.length === 0) return await listOnePost(id);
-    values.push(id);
-    const query = `UPDATE posts SET ${sql.join(", ")} WHERE id = ?`;
-    const [result] = await pool.query<ResultSetHeader>(query, values);
-    if (result.affectedRows === 0) return undefined;
     return await listOnePost(result.insertId);
 };
 
-export const deleteOnePost = async (id: number): Promise<boolean> => {
-    const [result] = await pool.query<ResultSetHeader>(
-        `DELETE FROM posts WHERE id = ?`,
-        [id]
+export const updatePost = async (id: number, title: string, content: string, category: string, tags: string[]): Promise<Post | undefined> => {
+    const [result] = await pool.query<ResultSetHeader>(`UPDATE posts SET title = ?, content = ?, category = ?, tags = ? WHERE id = ?`, 
+        [title, content, category, JSON.stringify(tags), id]
     );
+    if (result.affectedRows === 0) return undefined;
+    return await listOnePost(id);
+};
+
+export const deleteOnePost = async (id: number): Promise<boolean> => {
+    const [result] = await pool.query<ResultSetHeader>(`DELETE FROM posts WHERE id = ?`, [id]);
     return result.affectedRows > 0;
 };
 

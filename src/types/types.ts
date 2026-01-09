@@ -1,5 +1,5 @@
 export type Post = {
-    id?: number;
+    id: number;
     title: string;
     content: string;
     category: string;
@@ -7,7 +7,3 @@ export type Post = {
     created_at?: Date;
     updated_at?: Date;
 }
-
-export type UpdatePostInput = Partial<Omit<Post, "id" | "created_at" | "updated_at">> & {
-    tags?: string[];
-};
